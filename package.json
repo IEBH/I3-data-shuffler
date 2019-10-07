@@ -1,0 +1,26 @@
+{
+  "name": "@iebh/i3-data-shuffler",
+  "version": "0.0.0",
+  "description": "Data shuffler and randomizer for spreadsheet files",
+  "main": "shuffle.js",
+  "scripts": {
+    "test": "./test/test.sh"
+  },
+  "keywords": [
+    "random",
+    "shuffle",
+    "randomizer",
+    "csv"
+  ],
+  "author": "Matt Carter <m@ttcarter.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IEBH/I3-data-shuffler.git"
+  },
+  "dependencies": {
+    "commander": "^3.0.2",
+    "lodash": "^4.17.15",
+    "xlsx": "^0.15.1"
+  }
+}

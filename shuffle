@@ -1,0 +1,64 @@
+#!/usr/bin/env node
+
+// Prerequite NPM modules
+var _ = require('lodash');
+var commander = require('commander');
+var xlsx = require('xlsx');
+
+
+// Parse all command line options
+var program = commander
+	.version(require('./package.json').version)
+	.name('shuffle')
+	.usage('--input=inputFile --output=outputFile [--order] [--delete-percent=number]')
+	.option('-i, --input <path>', 'Specify the input file')
+	.option('-o, --output <path>', 'Specify the output file')
+	.option('-r, --order', 'Randomize the output order (ignores the first line which is assumed to be the headers')
+	.option('-d, --delete-percentage <number>', 'Delete the given percentage of lines, randomly')
+	.option('-s, --sheet <name>', 'Which worksheet to use within the data, if none specified the first is used')
+	.option('-v, --verbose', 'Be verbose - use multiple to increase verbosity', (v, total) => total + 1, 0)
+	.parse(process.argv)
+
+
+// Sanity checks
+if (!program.input) throw new Error('Err: --input=path Must be specified')
+if (!program.output) throw new Error('Err: --output=path Must be specified')
+
+
+// Read the workbook
+var workbook = xlsx.readFile(program.input);
+if (!Object.keys(workbook.Sheets).length) throw new Error('No worksheets found within input');
+
+
+// Get worksheet
+var worksheet = workbook.Sheets[program.sheet || Object.keys(workbook.Sheets)[0]];
+
+
+// Convert sheet to array-of-arrays...
+var data = xlsx.utils.sheet_to_json(worksheet);
+if (program.verbose) console.warn('Read', data.length, 'rows of data');
+
+
+// Reorder data if necessary
+if (program.order) data = _.shuffle(data);
+
+
+// Delete rows if necessary
+if (program.deletePercentage && program.deletePercentage > 0) {
+	var deleteCount = Math.floor(data.length * (program.deletePercentage / 100));
+	if (program.verbose) console.warn('Will delete', program.deletePercentage + '%', '=', deleteCount, 'rows out of', data.length);
+	data = _.dropRight(data, deleteCount);
+}
+
+
+// Replace worksheet with our new data
+worksheet = xlsx.utils.json_to_sheet(data);
+workbook.Sheets[program.sheet || Object.keys(workbook.Sheets)[0]] = worksheet;
+
+
+// Save everything into output file
+xlsx.writeFile(workbook, program.output);
+
+
+// End
+if (program.verbose) console.warn('Done');

@@ -1,0 +1,52 @@
+{
+  "name": "@iebh/data-shuffler",
+  "title": "Data shuffler",
+  "version": "0.0.0",
+  "description": "Data shuffler and randomizer for spreadsheet files",
+  "homepage": "https://github.com/IEBH/I3-data-shuffler",
+  "assets": {
+    "logo": "logo.svg"
+  },
+  "keywords": [
+    "random",
+    "shuffle",
+    "randomizer",
+    "csv"
+  ],
+  "author": "Matt Carter <m@ttcarter.com>",
+  "license": "MIT",
+  "inputs": [
+    {
+      "type": "spreadsheet",
+      "format": "csv",
+      "filename": "input.csv"
+    }
+  ],
+  "worker": {
+    "type": "docker",
+    "container": "@iebh/i3-base-node",
+    "command": "node shuffle -i '${inputs[0].path}' -o '${outputs[0].path}' ${config.shuffleOrder ? '--order' : ''} --delete-percent=${config.deletePercent}"
+  },
+  "outputs": [
+    {
+      "type": "spreadsheet",
+      "format": "csv",
+      "filename": "output.csv"
+    }
+  ],
+  "config": {
+    "shuffleOrder": {
+      "type": "boolean",
+      "default": true,
+      "help": "Shuffle the reference ordering"
+    },
+    "deletePercent": {
+      "type": "number",
+      "default": 20,
+      "min": 0,
+      "max": 100,
+      "interface": "slider",
+      "help": "Percentage of references to delete randomly"
+    }
+  }
+}
