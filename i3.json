@@ -3,7 +3,10 @@
   "title": "Data shuffler",
   "version": "0.0.0",
   "description": "Data shuffler and randomizer for spreadsheet files",
-  "homepage": "https://github.com/IEBH/I3-data-shuffler",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IEBH/I3-data-shuffler.git"
+  },
   "assets": {
     "logo": "logo.svg"
   },
@@ -24,8 +27,14 @@
   ],
   "worker": {
     "type": "docker",
-    "container": "@iebh/i3-base-node",
-    "command": "node shuffle -i '${inputs[0].path}' -o '${outputs[0].path}' ${config.shuffleOrder ? '--order' : ''} --delete-percent=${config.deletePercent}"
+    "base": "node:alpine",
+    "build": [
+      "apk add --no-cache git openssh",
+      "git clone --depth=1 https://github.com/IEBH/I3-data-shuffler.git /app",
+      "ls -la",
+      "npm ci"
+    ],
+    "command": "./shuffle -i '${inputs[0].path}' -o '${outputs[0].path}' ${config.shuffleOrder ? '--order' : ''} --delete-percentage=${config.deletePercent}"
   },
   "outputs": [
     {
